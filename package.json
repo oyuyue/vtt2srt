@@ -1,0 +1,15 @@
+{
+  "name": "vtt2srt",
+  "version": "1.0.0",
+  "description": "vtt to srt",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "vtt",
+    "srt"
+  ],
+  "author": "roc",
+  "license": "ISC"
+}
