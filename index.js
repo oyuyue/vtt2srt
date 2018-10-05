@@ -52,13 +52,13 @@ class Vtt2srt {
 
     data = data
       .replace(/^WEBVTT/g, '')
-      .replace(/(\d\d:\d\d)\.(\d\d\d)/g, '$1,$2')
-      .replace(/(\d\d:\d\d,\d\d\d)/g, '00:$1')
+      .replace(/(\d\d:\d\d)\.(\d\d\d)\b/g, '$1,$2')
+      .replace(/(\n|\s)(\d\d:\d\d,\d\d\d)(\s|\n)/g, '$100:$2$3')
       .trim();
 
     return (
       data
-        .split(/\r\r|\n\n|\r\n\r\n/g)
+        .split(/\n\n/g)
         .map((piece, i) => `${i+1}\n${piece}\n\n`)
         .join('')
     );
