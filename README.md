@@ -5,7 +5,7 @@
 ## 安装
 
 ```
-npm i -g vtt2srt
+npm i -g @wopen/vtt2srt
 ```
 
 ## 用法
