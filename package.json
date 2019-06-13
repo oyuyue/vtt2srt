@@ -1,0 +1,28 @@
+{
+  "name": "vtt2srt",
+  "version": "1.0.0",
+  "description": "",
+  "bin": "vtt2srt",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/woopen/vtt2srt.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/woopen/vtt2srt/issues"
+  },
+  "homepage": "https://github.com/woopen/vtt2srt#readme",
+  "dependencies": {
+    "commander": "^2.20.0",
+    "fs-extra": "^8.0.1",
+    "inquirer": "^6.3.1",
+    "klaw": "^3.0.0",
+    "signale": "^1.4.0"
+  }
+}

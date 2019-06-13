@@ -1,79 +1,104 @@
-const fs = require('fs');
-const path = require('path');
+const path = require("path");
+const fs = require("fs-extra");
+const walk = require("klaw");
+const commander = require("commander");
+const inquirer = require("inquirer");
+const signale = require("signale");
 
-class Vtt2srt {
+const interactive = new signale.Signale({ interactive: true });
 
-  constructor(dir = '.') {
-    dir = path.resolve(process.cwd(), dir);
+commander.version("1.0.0").option("-d, --delete", "删除原文件");
+on("--help", () => {
+  console.log();
+  console.log("Examples:");
+  console.log("  $ vtt2srt ./subtitles");
+  console.log("  $ vtt2srt -d a.vtt");
+}).parse(process.argv);
 
-    if (!this.checkPath(dir)) {
-      return false;
-    }
+async function vtt2srt(target, { keep = true }) {
+  const data = fs
+    .readFileSync(target, "utf-8")
+    .replace(/^WEBVTT/g, "")
+    .replace(/(\d\d:\d\d)\.(\d\d\d)\b/g, "$1,$2")
+    .replace(/(\n|\s)(\d\d:\d\d,\d\d\d)(\s|\n)/g, "$100:$2$3")
+    .trim()
+    .split(/(?:\r\n\r\n|\n\n|\r\r)/g)
+    .map((piece, i) => `${i + 1}\n${piece}\n\n`)
+    .join("");
 
-    if (dir.endsWith('.vtt')) {
-      return this.writeFile(`${dir.slice(0, -4)}.srt`, this.parseData(this.readFile(dir)));
-    }
+  fs.writeFileSync(`${target.slice(0, -4)}.srt`, data);
 
-    this.run(dir);
-  }
+  if (!keep) fs.removeSync(target);
+}
 
-  checkPath(path) {
-    try {
-      fs.accessSync(path);
-      return true;
-    } catch (error) {
-      console.log(error);
-      console.log(`\x1b[93;41m 文件夹|文件 不存在或没有权限 ${path} \x1b[39m`);
-      return false;
-    }
-  }
-
-  run(d) {
-    let stat;
-    fs.readdirSync(d).forEach(item => {
-
-      stat = fs.statSync(path.resolve(d, item));
-
-      if (stat.isFile()) {
-        if (item.endsWith('.vtt')) {
-          this.writeFile(
-            path.resolve(d, `${item.slice(0, -4)}.srt`),
-            this.parseData(this.readFile(path.resolve(d, item)))
-          );
-        }
-      } else if (stat.isDirectory()) {
-        this.run(path.resolve(d, item));
+async function run() {
+  let target = commander.args[0];
+  if (!target) {
+    const ans = await inquirer.prompt([
+      {
+        type: "confirm",
+        name: "do",
+        message: "转换当前目录下的所有 .vtt 为 .srt 文件",
+        default: false
       }
+    ]);
 
-    })
+    if (!ans.do) return;
+    target = "./";
+  }
+  target = path.resolve(__dirname, target);
+
+  let stat = null;
+
+  try {
+    stat = await fs.stat(target);
+  } catch (error) {
+    return signale.fatal(error);
   }
 
-  parseData(data) {
+  const options = {
+    keep: !commander.delete
+  };
 
-    data = data
-      .replace(/^WEBVTT/g, '')
-      .replace(/(\d\d:\d\d)\.(\d\d\d)\b/g, '$1,$2')
-      .replace(/(\n|\s)(\d\d:\d\d,\d\d\d)(\s|\n)/g, '$100:$2$3')
-      .trim();
+  if (stat.isFile()) {
+    if (!target.endsWith(".vtt")) return signale.error("文件必须是 .vtt 文件");
+    await vtt2srt(target, options);
+  } else if (stat.isDirectory()) {
+    const files = [];
+    walk(target)
+      .on("data", ({ path: p }) => p && p.endsWith(".vtt") && files.push(p))
+      .on("end", async () => {
+        const len = files.length;
+        if (len === 0)
+          return signale.error(`目录下没有 .vtt 文件 -> ${target}`);
 
-    return (
-      data
-        .split(/\n\n/g)
-        .map((piece, i) => `${i+1}\n${piece}\n\n`)
-        .join('')
-    );
+        const errors = [];
+
+        for (let i = 0; i < len; i++) {
+          interactive.await("[%d/%d] - %s", i + 1, len, files[i]);
+          try {
+            await vtt2srt(files[i], options);
+          } catch (error) {
+            interactive.fatal(error);
+            errors.push(files[i]);
+          }
+        }
+
+        interactive.success("[%d/%d] - 全部转换完成", len, len);
+
+        if (errors.length > 0) {
+          signale.debug("以下文件转换出错 >>>>>>>>>>>>>>");
+          console.log();
+          errors.forEach(e => {
+            signale.error(e);
+          });
+        }
+      });
+  } else {
+    signale.error("非法资源");
   }
-
-  readFile(path) {
-    return fs.readFileSync(path, { encoding: 'utf8' });
-  }
-
-  writeFile(path, data) {
-    fs.writeFileSync(path, data);
-  }
-
 }
 
 if (module.parent == null) {
-  new Vtt2srt(...process.argv.slice(2));
+  run().catch(e => signale.fatal(e));
 }
