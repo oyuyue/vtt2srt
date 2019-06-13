@@ -2,18 +2,18 @@
   "name": "vtt2srt",
   "version": "1.0.0",
   "description": "vtt to srt",
-  "bin": "vtt2srt",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "bin": "vtt2srt",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/woopen/vtt2srt.git"
+    "url": "https://github.com/woopen/vtt2srt.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "vtt",
+    "srt"
+  ],
+  "author": "woopen",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/woopen/vtt2srt/issues"
   },

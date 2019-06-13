@@ -5,10 +5,12 @@ const commander = require('commander');
 const inquirer = require('inquirer');
 const signale = require('signale');
 
+const { version } = require('./package.json')
+
 const interactive = new signale.Signale({ interactive: true });
 
 commander
-  .version('1.0.0')
+  .version(version)
   .option('-d, --delete', '删除原文件')
   .on('--help', () => {
     console.log();
@@ -41,7 +43,7 @@ async function run() {
       {
         type: 'confirm',
         name: 'do',
-        message: '转换当前目录下的所有 .vtt 为 .srt 文件',
+        message: '转换当前目录下的所有 .vtt 为 .srt 文件?',
         default: false
       }
     ]);
@@ -49,7 +51,7 @@ async function run() {
     if (!ans.do) return;
     target = './';
   }
-  target = path.resolve(__dirname, target);
+  target = path.resolve(process.cwd(), target);
 
   let stat = null;
 
