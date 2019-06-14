@@ -1,6 +1,6 @@
 {
   "name": "@wopen/vtt2srt",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "vtt to srt",
   "main": "vtt2srt.js",
   "bin": "vtt2srt.js",
