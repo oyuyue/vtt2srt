@@ -2,8 +2,8 @@
   "name": "@wopen/vtt2srt",
   "version": "1.0.0",
   "description": "vtt to srt",
-  "main": "index.js",
-  "bin": "vtt2srt",
+  "main": "vtt2srt.js",
+  "bin": "vtt2srt.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/woopen/vtt2srt.git"
